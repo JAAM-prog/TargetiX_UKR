@@ -1,0 +1,21 @@
+{
+  "name": "TargetiX JAAM (Stable)",
+  "version": "3.6",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        { "path": "firmware/v3.6/bootloader.bin", "offset": 4096 },
+        { "path": "firmware/v3.6/partitions.bin", "offset": 32768 },
+        { "path": "firmware/v3.6/firmware.bin", "offset": 65536 }
+      ]
+    },
+    {
+      "chipFamily": "ESP8266",
+      "parts": [
+        { "path": "firmware/v3.6/esp8266_firmware.bin", "offset": 0 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP Web Flasher</title>
+    
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --subtext-color: #64748b;
+            --border-color: #e2e8f0;
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --danger-bg: rgba(239, 68, 68, 0.08);
+            --danger-border: #ef4444;
+            --danger-text: #dc2626;
+            --info-bg: rgba(37, 99, 235, 0.05);
+            --info-border: #2563eb;
+            --help-card-bg: #f8fafc;
+            --input-bg: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --subtext-color: #94a3b8;
+            --border-color: #334155;
+            --primary-color: #3b82f6;
+            --primary-hover: #60a5fa;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-border: #f87171;
+            --danger-text: #fca5a5;
+            --info-bg: rgba(59, 130, 246, 0.1);
+            --info-border: #3b82f6;
+            --help-card-bg: #111827;
+            --input-bg: #0f172a;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .flasher-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 640px;
+            width: 100%;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            text-align: left;
+        }
+
+        .theme-toggle-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 12px;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .theme-toggle-btn:hover {
+            border-color: var(--primary-color);
+        }
+
+        .theme-toggle-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .device-image-container {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .device-image {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            display: block;
+        }
+
+        .form-group {
+            margin: 24px 0;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--subtext-color);
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 0.95rem;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='%2364748b' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 18px;
+        }
+
+        select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .changelog-box {
+            margin-top: 14px;
+            padding: 16px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            text-align: left;
+            transition: opacity 0.2s ease;
+        }
+
+        .changelog-box.fade {
+            opacity: 0.3;
+        }
+
+        .changelog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .changelog-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--subtext-color);
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge.beta {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .badge.stable {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .changelog-list {
+            margin: 0;
+            padding-left: 18px;
+            font-size: 0.88rem;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .changelog-list li {
+            margin-bottom: 4px;
+        }
+
+        .changelog-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .install-container {
+            margin-top: 24px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .install-button {
+            background: var(--primary-color);
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            max-width: 280px;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .install-button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        esp-web-install-button {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .alert-box {
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin: 16px 0;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .alert-box.danger {
+            background-color: var(--danger-bg);
+            border: 1px solid var(--danger-border);
+            color: var(--danger-text);
+        }
+
+        .alert-box p {
+            margin: 0;
+        }
+
+        /* Описи версій (Перша рамочка) */
+        .version-info-box {
+            margin-top: 24px;
+            padding: 16px;
+            background-color: var(--info-bg);
+            border-left: 4px solid var(--info-border);
+            border-top: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 14px;
+            text-align: left;
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        .version-info-box p {
+            margin: 6px 0;
+        }
+
+        .version-info-box p:first-child {
+            margin-top: 0;
+        }
+
+        .version-info-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Інструкція з усунення проблем (Друга рамочка) */
+        .troubleshooting-box {
+            margin-top: 18px;
+            padding: 20px;
+            background-color: var(--help-card-bg);
+            border: 1px dashed var(--border-color);
+            border-radius: 16px;
+            text-align: left;
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        .troubleshooting-box h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: var(--text-color);
+        }
+
+        .troubleshooting-box ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .troubleshooting-box li {
+            margin-bottom: 8px;
+        }
+
+        .troubleshooting-box li:last-child {
+            margin-bottom: 0;
+        }
+
+        .troubleshooting-box a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .troubleshooting-box a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="flasher-card">
+        <div class="header-container">
+            <h1>TargetiX Flasher</h1>
+            <button class="theme-toggle-btn" id="theme-toggle" type="button" aria-label="Переключити тему">
+                <span id="theme-icon">
+                    <!-- Сонце (Світла тема за замовчуванням) -->
+                    <svg viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>
+                </span>
+                <span id="theme-text">Світла</span>
+            </button>
+        </div>
+        
+        <div class="device-image-container">
+            <img src="device.png" alt="Фото пристрою" class="device-image" id="device-img">
+        </div>
+
+        <div class="form-group">
+            <label for="release-select">Виберіть версію прошивки:</label>
+            <select id="release-select">
+                <option value="">Завантаження версій...</option>
+            </select>
+
+            <div id="changelog-container" class="changelog-box">
+                <div class="changelog-header">
+                    <span class="changelog-title">Список змін</span>
+                    <span id="changelog-badge" class="badge"></span>
+                </div>
+                <ul id="changelog-list" class="changelog-list">
+                    <li>Завантаження даних...</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="install-container">
+            <esp-web-install-button id="install-btn">
+                <button slot="activate" class="install-button" id="activate-btn" type="button">Встановити</button>
+                
+                <div slot="unsupported">
+                    <div class="alert-box danger">
+                        <p><strong>Помилка:</strong> Ваш браузер не підтримує Web Serial API. Скористайтеся Chrome, Edge або Opera на ПК.</p>
+                    </div>
+                </div>
+                
+                <div slot="not-allowed">
+                    <div class="alert-box danger">
+                        <p><strong>Помилка:</strong> Прошивка доступна лише через протокол HTTPS або на localhost.</p>
+                    </div>
+                </div>
+            </esp-web-install-button>
+        </div>
+
+        <!-- Рамочка 1: Опис версій -->
+        <div class="version-info-box">
+            <p><strong>JAAM</strong> — стабільна релізна версія прошивки.</p>
+            <p><strong>JAAM Beta</strong> — тестова версія прошивки. Містить функції, що перебувають у розробці. Підтримуються чіпи ESP32, ESP32-S3, ESP32-C3.</p>
+        </div>
+
+        <!-- Рамочка 2: Пошук пристрою / Драйвери -->
+        <div class="troubleshooting-box">
+            <h3>Якщо ви не обрали порт через те, що не бачили ваш пристрій у списку, спробуйте наступні кроки:</h3>
+            <ul>
+                <li>Переконайтеся, що пристрій підключений до цього комп'ютера (до того, де запущено браузер, що відображає цей веб-сайт).</li>
+                <li>Більшість пристроїв мають світлодіод. Якщо ваш має такий, переконайтеся, що він увімкнений.</li>
+                <li>Переконайтесь, що USB-кабель, яким пристрій підключено до комп'ютера, є кабелем передачі даних, а не лише кабелем для живлення.</li>
+                <li>
+                    Переконайтеся, що встановлені правильні драйвери. Нижче наведено драйвери для загальних мікросхем, що використовуються в пристроях ESP:
+                    <ul>
+                        <li><strong>CP2102 драйвери:</strong> <a href="https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers" target="_blank" rel="noopener">Windows & Mac</a></li>
+                        <li><strong>CH342, CH343, CH9102 драйвери:</strong> <a href="http://www.wch-ic.com/downloads/CH343SER_EXE.html" target="_blank" rel="noopener">Windows</a>, <a href="http://www.wch-ic.com/downloads/CH341SER_MAC_ZIP.html" target="_blank" rel="noopener">Mac</a> (завантаження за допомогою синьої кнопки з іконкою)</li>
+                        <li><strong>CH340, CH341 драйвери:</strong> <a href="http://www.wch-ic.com/downloads/CH341SER_EXE.html" target="_blank" rel="noopener">Windows</a>, <a href="http://www.wch-ic.com/downloads/CH341SER_MAC_ZIP.html" target="_blank" rel="noopener">Mac</a> (завантаження за допомогою синьої кнопки з іконкою)</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+
+    <script>
+        // --- Управління темою (За замовчуванням — Світла) ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const themeText = document.getElementById('theme-text');
+
+        const sunIcon = `<svg viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>`;
+        const moonIcon = `<svg viewBox="0 0 24 24"><path d="M12.3 2c.43 0 .77.35.72.78-.3 2.38.15 4.84 1.34 6.81 1.42 2.35 3.79 3.96 6.47 4.38.43.07.72.48.59.9-.96 3.12-3.1 5.65-6.04 6.96-3.1 1.39-6.72 1.13-9.56-.68s-4.32-4.88-3.87-8.23c.46-3.41 2.65-6.32 5.75-7.61 1.41-.59 2.94-.89 4.6-.89z"/></svg>`;
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            if (theme === 'dark') {
+                themeIcon.innerHTML = moonIcon;
+                themeText.textContent = 'Темна';
+            } else {
+                themeIcon.innerHTML = sunIcon;
+                themeText.textContent = 'Світла';
+            }
+        }
+
+        // За замовчуванням вибираємо світлу ("light")
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+
+        // --- Завантаження та вибір прошивки ---
+        const selectEl = document.getElementById('release-select');
+        const installBtn = document.getElementById('install-btn');
+        const activateBtn = document.getElementById('activate-btn');
+        const changelogList = document.getElementById('changelog-list');
+        const changelogBadge = document.getElementById('changelog-badge');
+        const changelogBox = document.getElementById('changelog-container');
+
+        let changelogs = {};
+
+        async function loadChangelogs() {
+            try {
+                const response = await fetch('changelog.json');
+                changelogs = await response.json();
+                
+                selectEl.innerHTML = '';
+                
+                Object.keys(changelogs).forEach(manifest => {
+                    const opt = document.createElement('option');
+                    opt.value = manifest;
+                    opt.textContent = changelogs[manifest].version || manifest;
+                    selectEl.appendChild(opt);
+                });
+
+                updateChangelog();
+            } catch (error) {
+                console.error('Помилка завантаження changelog.json:', error);
+                changelogList.innerHTML = '<li>Не вдалося завантажити список змін</li>';
+            }
+        }
+
+        function updateChangelog() {
+            const selectedValue = selectEl.value;
+            const data = changelogs[selectedValue];
+
+            changelogBox.classList.add('fade');
+
+            setTimeout(() => {
+                if (data) {
+                    const versionName = data.version || selectedValue;
+                    
+                    changelogBadge.textContent = data.label || data.type;
+                    changelogBadge.className = `badge ${data.type}`;
+
+                    changelogList.innerHTML = '';
+                    if (Array.isArray(data.changes)) {
+                        data.changes.forEach(item => {
+                            const li = document.createElement('li');
+                            li.textContent = item;
+                            changelogList.appendChild(li);
+                        });
+                    }
+
+                    installBtn.setAttribute('manifest', selectedValue);
+                    activateBtn.textContent = `Встановити JAAM ${versionName}`;
+                }
+                changelogBox.classList.remove('fade');
+            }, 150);
+        }
+
+        selectEl.addEventListener('change', updateChangelog);
+
+        loadChangelogs();
+    </script>
+</body>
+</html>

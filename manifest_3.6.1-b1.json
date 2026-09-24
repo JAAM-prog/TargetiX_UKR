@@ -1,0 +1,21 @@
+{
+  "name": "TargetiX JAAM (Beta)",
+  "version": "3.6.1-b1",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        { "path": "firmware/v3.6.1-b1/bootloader.bin", "offset": 4096 },
+        { "path": "firmware/v3.6.1-b1/partitions.bin", "offset": 32768 },
+        { "path": "firmware/v3.6.1-b1/firmware.bin", "offset": 65536 }
+      ]
+    },
+    {
+      "chipFamily": "ESP8266",
+      "parts": [
+        { "path": "firmware/v3.6.1-b1/esp8266_firmware.bin", "offset": 0 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "manifest_3.6.1-b1.json": {
+    "version": "3.6.1-b1 (Beta)",
+    "label": "Beta",
+    "type": "beta",
+    "changes": [
+      "Тестовий реліз",
+      "Оновлення WiFi та WebSockets"
+    ]
+  },
+  "manifest_3.6.json": {
+    "version": "3.6",
+    "label": "Stable",
+    "type": "stable",
+    "changes": [
+      "Перший стабільний реліз",
+      "Базовий функціонал та Captive Portal"
+    ]
+  }
+}
